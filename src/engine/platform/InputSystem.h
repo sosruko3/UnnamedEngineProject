@@ -5,11 +5,9 @@
 #include <array>
 
 union SDL_Event;
-class LogSystem;
 
 class InputSystem {
 public:
-  LogSystem* log = nullptr;
   bool init(); // Empty for now. No initialization needed.
   void shutdown(); // Empty for now. No shutdown needed.
   void handleEvent(const SDL_Event& event);

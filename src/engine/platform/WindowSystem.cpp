@@ -11,12 +11,12 @@ bool WindowSystem::init() {
     
     window = SDL_CreateWindow("Title1", 1280 , 720, SDL_WINDOW_RESIZABLE);
     if (!window) {
-        log->Error("Failed to create window: {}", SDL_GetError());
+        LogSystem::Error("Failed to create window: {}", SDL_GetError());
         return false;
     }
     if (!SDL_GetWindowSize(window, &width, &height)) {
         // might also need Pixel version of this window size, check this again later on.
-        log->Error("SDL_GetWindowSize failed: {}", SDL_GetError());
+        LogSystem::Error("SDL_GetWindowSize failed: {}", SDL_GetError());
         SDL_DestroyWindow(window);
         window = nullptr;
         return false;

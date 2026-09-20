@@ -1,11 +1,9 @@
 #pragma once
 #include <stdint.h>
 union SDL_Event;
-class LogSystem;
 
 class Platform {
 public:
-    LogSystem* log = nullptr;
     bool init();
     void shutdown();
     static uint64_t getTicksNS();

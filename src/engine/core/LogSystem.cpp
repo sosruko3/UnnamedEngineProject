@@ -15,6 +15,7 @@
 #include <spdlog/async.h>
 #include <assert.h>
 
+// constants
 constexpr size_t LOG_MAX_FILE_SIZE = static_cast<size_t>(5 * 1024 * 1024);
 constexpr size_t LOG_MAX_FILES = 3;
 constexpr const char* LOG_FILE_NAME = "engine.log";
@@ -23,10 +24,11 @@ constexpr const char* LOG_FILE_NAME = "engine.log";
 struct LoggerImpl {
     std::shared_ptr<spdlog::logger> spdlogger;
 };
+LoggerImpl* LogSystem::loggerImpl_ = nullptr;
+
 
 bool LogSystem::init(const char* logDir) {
-    if (initialized_ || loggerImpl_ != nullptr) {
-        assert(!initialized_ && "LogSystem::init called twice!");
+    if (loggerImpl_ != nullptr) {
         return false;
     }
     
@@ -53,28 +55,38 @@ bool LogSystem::init(const char* logDir) {
 
     // flush on error level, so errors and higher priorities are immediately visible.
     LogSystem::flush_on(LogLevel::Error);
-    initialized_ = true;
     return true;
 }
 
+void LogSystem::Write(LogLevel level, fmt::string_view fmt, fmt::format_args args) {
+    if (!loggerImpl_ || !loggerImpl_->spdlogger) return;
+    // log level is checked before formatting.
+    auto spdLevel = static_cast<spdlog::level::level_enum>(level);
+    // should_log is checked.
+    if (!loggerImpl_->spdlogger->should_log(spdLevel)) return;
+    
+    // stack buffer, zero heap allocations for standard messages
+    fmt::memory_buffer buf;
+    // fmt::vformat_to is used to avoid heap allocations for the formatted string.
+    fmt::vformat_to(std::back_inserter(buf), fmt, args);
+    // log(level, string_view) is called with the formatted string.
+    loggerImpl_->spdlogger->log(spdLevel, std::string_view(buf.data(), buf.size()));
+}
+
 void LogSystem::setLevel(LogLevel level) {
-    assert(initialized_ && "LogSystem::setLevel called before init!");
     loggerImpl_->spdlogger->set_level(static_cast<spdlog::level::level_enum>(level));
 }
 
 void LogSystem::setPattern(const char* pattern) {
-    assert(initialized_ && "LogSystem::setPattern called before init!");
     loggerImpl_->spdlogger->set_pattern(pattern);
 }
 
 void LogSystem::flush_on(LogLevel level) {
-    assert(initialized_ && "LogSystem::flush_on called before init!");
     loggerImpl_->spdlogger->flush_on(static_cast<spdlog::level::level_enum>(level));
 }
 
 void LogSystem::shutdown() {
-    if (!initialized_ || loggerImpl_ == nullptr) {
-        assert(!initialized_ && "LogSystem::shutdown called before init!");
+    if (loggerImpl_ == nullptr) {
         return;
     }
     // force flush and shutdown.
@@ -82,5 +94,4 @@ void LogSystem::shutdown() {
     spdlog::shutdown();
     delete loggerImpl_;
     loggerImpl_ = nullptr;
-    initialized_ = false;
 }

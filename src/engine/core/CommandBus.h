@@ -24,10 +24,6 @@ constexpr uint16_t CMD_BUFFER_MASK = (CMD_BUFFER_SIZE - 1);
 static_assert((CMD_BUFFER_SIZE & CMD_BUFFER_MASK) == 0,
               "CMD_BUFFER_SIZE must be a power of 2");
 
-// ============================================================================
-// Command Structure (64 bytes, C11 Anonymous Union)
-// ============================================================================
-
 struct Command {
   // NOTE CHANGED type to uint32_t for temporary. This is for 4 byte aligning.
   // DO NOT FORGET THIS!!!!

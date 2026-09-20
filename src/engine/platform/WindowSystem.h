@@ -1,9 +1,11 @@
 #pragma once
 struct SDL_Window;
 union SDL_Event;
+class LogSystem;
 
 class WindowSystem {
 public:
+    LogSystem* log = nullptr;
     bool init(); // SDL_CreateWindow
     void shutdown(); // SDL_DestroyWindow
     void handleEvent(const SDL_Event& event); // SDL_PollEvent

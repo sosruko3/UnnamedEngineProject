@@ -1,4 +1,5 @@
 #include "LogSystem.h"
+#include <initializer_list>
 
 // this deletes lower priority log messages. we don't see debug messages on release.
 #ifdef NDEBUG
@@ -16,6 +17,7 @@
 
 constexpr size_t LOG_MAX_FILE_SIZE = static_cast<size_t>(5 * 1024 * 1024);
 constexpr size_t LOG_MAX_FILES = 3;
+constexpr const char* LOG_FILE_NAME = "engine.log";
 
 // this for opaque logger implementation. less header dependencies.
 struct LoggerImpl {
@@ -37,11 +39,11 @@ bool LogSystem::init(const char* logDir) {
     // enable console and file logging.
     auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        logDir, LOG_MAX_FILE_SIZE, LOG_MAX_FILES);
-
+        std::string(logDir) + LOG_FILE_NAME, LOG_MAX_FILE_SIZE, LOG_MAX_FILES);
+    
     // this is async logger with overrun oldest, so old logs are discarded if the queue is full.
     loggerImpl_->spdlogger = std::make_shared<spdlog::async_logger>(
-        "engine", spdlog::sinks_init_list{consoleSink, fileSink},
+        "engine", spdlog::sinks_init_list{ consoleSink, fileSink },
         spdlog::thread_pool(),
         spdlog::async_overflow_policy::overrun_oldest);
 

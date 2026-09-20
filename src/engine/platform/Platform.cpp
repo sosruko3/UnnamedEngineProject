@@ -8,6 +8,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <assert.h>
 
+// LogSystem is not initialized during ::init, due to this we just use fprintf there.
 
 static bool s_platformInitialized = false;
 static char* s_allocatedPrefPath = nullptr;
@@ -17,7 +18,7 @@ bool Platform::init() {
     if (s_platformInitialized) return true;
     
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        logSystem.Error("Failed to initialize SDL: {}", SDL_GetError());
+        fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return false;
     }
     s_platformInitialized = true;
@@ -25,7 +26,7 @@ bool Platform::init() {
     // Getting pref path
     s_allocatedPrefPath = SDL_GetPrefPath("myOrg", "myApp");
     if (!s_allocatedPrefPath) {
-        logSystem.Error("Failed to get pref path: {}", SDL_GetError());
+        fprintf(stderr, "Failed to get pref path: %s\n", SDL_GetError());
     } else {
         s_prefPath = s_allocatedPrefPath;
     }

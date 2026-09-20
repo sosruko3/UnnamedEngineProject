@@ -89,21 +89,25 @@ void Engine::EnginePhase4_Cleanup() {
 
 
 bool Engine::init(Arena* masterArena) {
-  // SubArena Allocations
-  entityArena = masterArena->Split(8 * 1024 * 1024, 64);  // 8MB
-  physicsArena = masterArena->Split(4 * 1024 * 1024, 64); // 4MB
-  busArena = masterArena->Split(8 * 1024 * 1024, 64);     // 8MB
-  audioArena = masterArena->Split(16 * 1024 * 1024, 64);  // 16MB
-  frameArena = masterArena->Split(16 * 1024 * 1024, 64);  // 16MB
+  // SubArena Allocations, check this again, dont like how long it is.
+  entityArena = masterArena->Split(static_cast<size_t>(8 * 1024 * 1024), 64);  // 8MB
+  physicsArena = masterArena->Split(static_cast<size_t>(4 * 1024 * 1024), 64); // 4MB
+  busArena = masterArena->Split(static_cast<size_t>(8 * 1024 * 1024), 64);     // 8MB
+  audioArena = masterArena->Split(static_cast<size_t>(16 * 1024 * 1024), 64);  // 16MB
+  frameArena = masterArena->Split(static_cast<size_t>(16 * 1024 * 1024), 64);  // 16MB
   reg = entityArena.Push<EntityRegistry>();
   bus = busArena.Push<CommandBus>();
 
   if (!platform.init()) {
-    // Logger is not initialized yet, use something else, 
-    fprintf(stderr, "[ENGINE] Platform failed to initialize. ");
+    logSystem.Error("[ENGINE] Platform failed to initialize. ");
     return false;
   }
+  
+  // Logger initialization and log pointer to systems.
   logSystem.init(platform.GetPrefPath());
+  platform.log = &logSystem;
+  windowSystem.log = &logSystem;
+  inputSystem.log = &logSystem;
 
   timeSystem_Init(&time);
   if (!windowSystem.init()) {

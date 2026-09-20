@@ -21,6 +21,7 @@ public:
     bool init(const char* logDir);
     void setLevel(LogLevel level);
     void setPattern(const char* pattern);
+    void EnableFileLogging(const char* logDir);
     void flush_on(LogLevel level);
     void shutdown();
     

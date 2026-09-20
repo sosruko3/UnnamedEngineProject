@@ -17,7 +17,7 @@ bool Platform::init() {
     if (s_platformInitialized) return true;
     
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        Log(LogLevel::Error, "Failed to initialize SDL: {}", SDL_GetError());
+        logSystem.Error("Failed to initialize SDL: {}", SDL_GetError());
         return false;
     }
     s_platformInitialized = true;
@@ -25,7 +25,7 @@ bool Platform::init() {
     // Getting pref path
     s_allocatedPrefPath = SDL_GetPrefPath("myOrg", "myApp");
     if (!s_allocatedPrefPath) {
-        Log(LogLevel::Error, "Failed to get pref path: {}", SDL_GetError());
+        logSystem.Error("Failed to get pref path: {}", SDL_GetError());
     } else {
         s_prefPath = s_allocatedPrefPath;
     }

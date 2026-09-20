@@ -99,24 +99,24 @@ bool Engine::init(Arena* masterArena) {
   bus = busArena.Push<CommandBus>();
 
   if (!platform.init()) {
-    Log(LogLevel::Error, "[ENGINE] Platform failed to initialize. ");
-    Logger_Shutdown();
+    // Logger is not initialized yet, use something else, 
+    fprintf(stderr, "[ENGINE] Platform failed to initialize. ");
     return false;
   }
-  Logger_Init(platform.GetPrefPath());
+  logSystem.init(platform.GetPrefPath());
 
   timeSystem_Init(&time);
   if (!windowSystem.init()) {
-    Log(LogLevel::Error, "[ENGINE] WindowSystem failed to initialize. ");
+    logSystem.Error("[ENGINE] WindowSystem failed to initialize. ");
     platform.shutdown();
-    Logger_Shutdown();
+    logSystem.shutdown();
     return false;
   }
   if (!inputSystem.init()) {
-    Log(LogLevel::Error, "[ENGINE] InputSystem failed to initialize. ");
+    logSystem.Error("[ENGINE] InputSystem failed to initialize. ");
     platform.shutdown();
     windowSystem.shutdown();
-    Logger_Shutdown();
+    logSystem.shutdown();
     return false;
   }
   CommandBus_Init(*bus);
@@ -154,7 +154,7 @@ void Engine::run() {
   }
 }
 void Engine::shutdown() {
-  Log(LogLevel::Info, "Engine Shutting down...");
+  logSystem.Info("Engine Shutting down...");
   SceneManager_Shutdown(*reg, *bus);
   EntityManager_Shutdown(*reg);
   audioSystem_Shutdown();
@@ -166,6 +166,6 @@ void Engine::shutdown() {
   // Add failsafes later on.
   
   running = false;
-  Log(LogLevel::Info, "Engine Shutdown Complete.");
-  Logger_Shutdown();
+  logSystem.Info("Engine Shutdown Complete.");
+  logSystem.shutdown();
 }

@@ -139,7 +139,7 @@ bool physicsAPI_IsSleeping(const EntityRegistry &reg, Entity entity) {
 
 uint8_t physicsAPI_GetMaterial(const EntityRegistry &reg, Entity entity) {
   if (!EntityRegistry_IsAlive(reg, entity)) {
-    return MAT_DEFAULT;
+    return 0; // fix this later on.
   }
 
   return reg.material_id[entity.id];

@@ -5,6 +5,7 @@
 #include "engine/platform/InputSystem.h"
 #include "engine/platform/TimeSystem.h"
 #include "engine/memory/Arena.h"
+#include "engine/core/LogSystem.h"
 
 struct EntityRegistry;
 struct CommandBus;
@@ -30,6 +31,7 @@ private:
     Platform platform;
     WindowSystem windowSystem;
     InputSystem inputSystem;
+    LogSystem logSystem;
     TimeContext time;
     EntityRegistry *reg;
     CommandBus *bus;

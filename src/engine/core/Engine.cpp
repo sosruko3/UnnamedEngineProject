@@ -14,7 +14,7 @@
 
 // ENGINE PHASES
 void Engine::EnginePhase0_PlatformSync() {
-  timeSystem_Update(&time);
+  timeSystem.update();
   
 }
 
@@ -27,7 +27,6 @@ void Engine::EnginePhase1_InputAndLogic() {
   //scenePacket scenePkt =
   //    CreateScenePacket(packet->reg, packet->bus, packet->time->gameDt);
   
-  //Input_Poll();
   Engine::pollEvents();
   
   
@@ -44,7 +43,7 @@ void Engine::EnginePhase2_Simulation() {
 
   EntitySystem_Update(&entityPkt);
 
-  while (timeSystem_ConsumeFixedStep(&time)) {
+  while (timeSystem.consumeFixedStep()) {
     //PhysicsSystem_Update(&physicsPkt);
   }
   AnimationSystem_Update();
@@ -90,7 +89,7 @@ void Engine::EnginePhase4_Cleanup() {
 
 bool Engine::init(Arena* masterArena) {
   // SubArena Allocations, check this again, dont like how long it is.
-  entityArena = masterArena->Split(static_cast<size_t>(8 * 1024 * 1024), 64);  // 8MB
+  entityArena = masterArena->Split(static_cast<size_t>(40 * 1024 * 1024), 64);  // 40MB
   physicsArena = masterArena->Split(static_cast<size_t>(4 * 1024 * 1024), 64); // 4MB
   busArena = masterArena->Split(static_cast<size_t>(8 * 1024 * 1024), 64);     // 8MB
   audioArena = masterArena->Split(static_cast<size_t>(16 * 1024 * 1024), 64);  // 16MB
@@ -106,7 +105,7 @@ bool Engine::init(Arena* masterArena) {
   // Logger initialization
   LogSystem::init(platform.GetPrefPath());
 
-  timeSystem_Init(&time);
+  timeSystem.init();
   if (!windowSystem.init()) {
     LogSystem::Error("[ENGINE] WindowSystem failed to initialize. ");
     platform.shutdown();

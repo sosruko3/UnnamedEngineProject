@@ -30,7 +30,7 @@ private:
     Platform platform;
     WindowSystem windowSystem;
     InputSystem inputSystem;
-    TimeContext time;
+    TimeSystem timeSystem;
     EntityRegistry *reg;
     CommandBus *bus;
     

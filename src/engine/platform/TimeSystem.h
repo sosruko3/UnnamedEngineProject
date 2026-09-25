@@ -1,14 +1,15 @@
 #pragma once
 
-struct TimeContext {
+struct TimeSystem {
+public:
+  void init();
+  void update();
+  bool consumeFixedStep();
   float realDt;
   float gameDt;
   float fixedDt;
+  float timeScale;
+private:
   double lastTime;
   float accumulator;
-  float timeScale;
 };
-
-void timeSystem_Init(TimeContext *time);
-void timeSystem_Update(TimeContext *time);
-bool timeSystem_ConsumeFixedStep(TimeContext *time);

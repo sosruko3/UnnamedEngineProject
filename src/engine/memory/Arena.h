@@ -47,7 +47,8 @@ struct Arena {
     }
 };
 
-// Master arena lifecycle. Free functions because they create/destroy the arena
-// itself rather than mutating an existing one.
+// Master arena lifecycle. 
+// This is just for MasterArena since others are not really allocated
+// as separate memory blocks.
 Arena ArenaAllocate(size_t capacity);
 void  ArenaFree(Arena* arena);

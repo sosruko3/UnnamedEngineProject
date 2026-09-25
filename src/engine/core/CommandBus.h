@@ -25,10 +25,8 @@ static_assert((CMD_BUFFER_SIZE & CMD_BUFFER_MASK) == 0,
               "CMD_BUFFER_SIZE must be a power of 2");
 
 struct Command {
-  // NOTE CHANGED type to uint32_t for temporary. This is for 4 byte aligning.
-  // DO NOT FORGET THIS!!!!
   uint32_t type; // CommandType (4 bytes)
-  Entity entity; // Target entity(id,generations) (8 bytes)
+  Entity entity; // Target entity(18:14 / id,generations) (4 bytes)
 
   // Anonymous union - access directly: cmd.move.x, cmd.anim.animID
   union {
@@ -52,7 +50,7 @@ struct Command {
     CommandPayloadAudioB8 audiob8;
     CommandPayloadAudioVec2 audiovec2;
     CommandPayloadAudioOneShot audioshot;
-    alignas(4) uint8_t raw[48];
+    alignas(4) uint8_t raw[52];
   };
 };
 

@@ -1,5 +1,4 @@
 #include "LogSystem.h"
-#include <initializer_list>
 
 // this deletes lower priority log messages. we don't see debug messages on release.
 #ifdef NDEBUG
@@ -24,6 +23,7 @@ constexpr const char* LOG_FILE_NAME = "engine.log";
 struct LoggerImpl {
     std::shared_ptr<spdlog::logger> spdlogger;
 };
+
 LoggerImpl* LogSystem::loggerImpl_ = nullptr;
 
 

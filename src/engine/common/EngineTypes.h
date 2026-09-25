@@ -1,45 +1,35 @@
 #pragma once
 
+#include <SDL3/SDL_pixels.h>
 #include <stddef.h>
 #include <stdint.h>
 
-struct EntityRegistry;
-struct CommandBus;
+constexpr uint32_t ENTITY_INDEX_BITS = 18;
+constexpr uint32_t ENTITY_INDEX_MASK = (1u << ENTITY_INDEX_BITS) - 1;
+constexpr uint32_t ENTITY_MAX        = 1u << ENTITY_INDEX_BITS;
+constexpr uint32_t GENERATION_BITS = 32 - ENTITY_INDEX_BITS;
+constexpr uint32_t GENERATION_MASK = (1u << GENERATION_BITS) - 1;
 
-/*
-struct EngineContext {
-  Arena masterArena;
-  Arena entityArena;
-  Arena physicsArena;
-  Arena audioArena;
-  Arena busArena;
-  Arena frameArena;
-  TimeContext time;
-  EntityRegistry *reg;
-  CommandBus *bus;
+struct Entity {
+    uint32_t id = 0;
+    uint32_t index() const      { return id & ENTITY_INDEX_MASK; }
+    uint32_t generation() const { return id >> ENTITY_INDEX_BITS; }
+    bool operator==(const Entity &other) const { return id == other.id; }
+    bool operator!=(const Entity &other) const { return id != other.id; }
 };
-*/
 
-// Enum Forward Declaration.
+
+
 enum AudioSourceID : uint16_t;
 enum AudioGroupID : uint8_t;
 enum AudioUsageType : uint8_t;
-
-struct Entity {
-  uint32_t id;         ///< Index into the registry arrays
-  uint32_t generation; ///< Generation counter for validation
-};
-
-#define ENTITY_ID_MAX UINT32_MAX
-#define ENTITY_INVALID (Entity{.id = ENTITY_ID_MAX, .generation = 0})
-#define ENTITY_IS_VALID(e) ((e).id != ENTITY_ID_MAX)
-#define ENTITY_MATCH(e1, e2)                                                   \
-  ((e1).id == (e2).id && (e1).generation == (e2).generation)
 
 struct AudioID {
   uint16_t index;
   uint16_t gen;
 };
+
+
 
 struct creVec2 {
   float x;

@@ -93,28 +93,11 @@ struct EntityRegistry {
   alignas(64) uint8_t batch_ids[MAX_ENTITIES];
 
   alignas(64) creVec2 size[MAX_ENTITIES];
-  alignas(64) uint8_t material_id[MAX_ENTITIES];
-  alignas(64) float drag[MAX_ENTITIES];
-  alignas(64) float inv_mass[MAX_ENTITIES];
-  alignas(64) float gravity_scale[MAX_ENTITIES];
-  alignas(64) float rotation[MAX_ENTITIES];
 
-  // change sprite_ids to uint32_t?? Not sure about this one.
-  alignas(64) uint16_t sprite_ids[MAX_ENTITIES];
   alignas(64) creColor colors[MAX_ENTITIES];
   alignas(64) creVec2 pivot[MAX_ENTITIES];
   alignas(64) creVec2 visual_scale[MAX_ENTITIES];
-
-  alignas(64) float anim_timers[MAX_ENTITIES];
-  alignas(64) float anim_speeds[MAX_ENTITIES]; //< speed multiplier
-  alignas(64) uint16_t anim_ids[MAX_ENTITIES];
-  alignas(64) uint16_t anim_frames[MAX_ENTITIES]; //< Current frame idx
-  alignas(64) bool anim_finished[MAX_ENTITIES];
-  alignas(64) float anim_base_durations[MAX_ENTITIES];
-  alignas(64) uint16_t anim_frame_counts[MAX_ENTITIES];
-  alignas(64) uint16_t anim_start_sprites[MAX_ENTITIES];
-  alignas(64) bool anim_loops[MAX_ENTITIES];
-
+  
   alignas(64) CameraComponent cameras[MAX_CAMERAS];
   alignas(64) uint32_t camera_count;
 

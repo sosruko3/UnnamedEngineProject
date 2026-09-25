@@ -1,185 +1,84 @@
 #include "EntityManager.h"
-#include "EntityRegistry.h"
-#include "engine/common/EngineColors.h"
 #include "engine/core/LogSystem.h"
 #include "engine/common/EngineTypes.h"
+#include "engine/memory/Arena.h"
 #include <assert.h>
-#include <string.h>
 
-// ============================================================================
-// Core API Implementation
-// ============================================================================
+// Using FIFO Ring buffer on the free list.
+// Gen=0 invalid, (1,3,5,...)Odd gens are dead, (2,4,6,...)Even gens are alive excluding 0.
+// Using a fixed-size array for generations and free indices.
+// Custom allocation using Arena, no dynamic memory allocation.
+// destroy() is deferred. An entity is alive until the command bus is flushed. isValid() reflects this.
 
-void EntityManager_Init(EntityRegistry &reg) {
+constexpr uint32_t MAX_ENTITIES = 16384;
+constexpr uint32_t MAX_ENTITIES_MASK = MAX_ENTITIES - 1;
 
-  // Zero everything including generations on first init
-  memset(&reg, 0, sizeof(EntityRegistry));
-
-  // Build free list (stack: high indices at bottom, low at top)
-  for (uint32_t i = 0; i < MAX_ENTITIES; i++) {
-    reg.free_list[i] = (MAX_ENTITIES - 1) - i;
+bool EntityManager::init(Arena* entityArena) {
+  if (!entityArena) {
+    LogSystem::Error("Entity Manager: Entity Arena is null");
+    return false;
   }
-  reg.free_count = MAX_ENTITIES;
-  reg.active_count = 0;
-  reg.max_used_bound = 0;
-
-  Log(LogLevel::Info, "Entity Manager Initialized (SoA, {} slots)",
-      MAX_ENTITIES);
-}
-
-void EntityManager_Reset(EntityRegistry &reg) {
-
-  // Clear component_masks and state_flags, but NOT generations!
-  memset(reg.component_masks, 0, sizeof(reg.component_masks));
-  memset(reg.state_flags, 0, sizeof(reg.state_flags));
-  memset(reg.render_layer, 0, sizeof(reg.render_layer));
-  memset(reg.batch_ids, 0, sizeof(reg.batch_ids));
-
-  // Clear data highways
-  memset(reg.pos, 0, sizeof(reg.pos));
-  memset(reg.vel, 0, sizeof(reg.vel));
-  memset(reg.size, 0, sizeof(reg.size));
-
-  memset(reg.inv_mass, 0, sizeof(reg.inv_mass));
-  memset(reg.drag, 0, sizeof(reg.drag));
-  memset(reg.gravity_scale, 0, sizeof(reg.gravity_scale));
-  memset(reg.material_id, 0, sizeof(reg.material_id));
-
-  memset(reg.rotation, 0, sizeof(reg.rotation));
-  memset(reg.sprite_ids, 0, sizeof(reg.sprite_ids));
-  memset(reg.colors, 0, sizeof(reg.colors));
-  memset(reg.types, 0, sizeof(reg.types));
-  memset(reg.visual_scale, 0, sizeof(reg.visual_scale));
-
-  memset(reg.anim_timers, 0, sizeof(reg.anim_timers));
-  memset(reg.anim_speeds, 0, sizeof(reg.anim_speeds));
-  memset(reg.anim_ids, 0, sizeof(reg.anim_ids));
-  memset(reg.anim_frames, 0, sizeof(reg.anim_frames));
-  memset(reg.anim_finished, 0, sizeof(reg.anim_finished));
-  memset(reg.anim_base_durations, 0, sizeof(reg.anim_base_durations));
-  memset(reg.cameras, 0, sizeof(reg.cameras));
-  reg.camera_count = 0;
-
-  memset(&reg.events, 0, sizeof(EntityEventDispatcher));
-
-  // Rebuild free list
+  generations = entityArena->Push<uint32_t>(MAX_ENTITIES);
+  free_indices = entityArena->Push<uint32_t>(MAX_ENTITIES);
+  // fill generations with 1
   for (uint32_t i = 0; i < MAX_ENTITIES; i++) {
-    reg.free_list[i] = (MAX_ENTITIES - 1) - i;
+    generations[i] = 1;
   }
-
-  reg.free_count = MAX_ENTITIES;
-  reg.active_count = 0;
-  reg.max_used_bound = 0;
-
-  Log(LogLevel::Info, "Entity Manager Reset Complete (generations preserved)");
+  head = 0;
+  tail = 0;
+  recycled_count = 0;
+  next_fresh = 0;
+  LogSystem::Info("Entity Manager initialized");
+  return true;
 }
 
-Entity EntityManager_ReserveSlot(EntityRegistry &reg) {
-
-  if (reg.free_count == 0)
-    return ENTITY_INVALID;
-
-  const uint32_t index = reg.free_list[--reg.free_count];
-  const uint32_t generation = reg.generations[index];
-
-  return Entity{.id = index, .generation = generation};
+Entity EntityManager::create() {
+  uint32_t index;
+  if (recycled_count > 0) {
+    // reuse a free entity
+    index = free_indices[head];
+    head = (head + 1) & MAX_ENTITIES_MASK;
+    recycled_count--;
+  } else if (next_fresh < MAX_ENTITIES) {
+    // allocate a new entity
+    index = next_fresh++;
+  } else {
+    // no more entities available
+    return Entity{};
+  }
+  // increment generation and return entity
+  return Entity{index | (++generations[index] << ENTITY_INDEX_BITS)};
 }
 
-void EntityManager_ReturnReservedSlot(EntityRegistry &reg,
-                                      Entity reserved_entity) {
-
-  if (reserved_entity.id >= MAX_ENTITIES)
-    return;
-
-  assert(reg.free_count < MAX_ENTITIES &&
-         "Double return / Free list overflow!");
-
-  reg.free_list[reg.free_count++] = reserved_entity.id;
-  reg.generations[reserved_entity.id]++;
+void EntityManager::destroy(Entity e) {
+  // if stale, skip
+  if (e.index() >= MAX_ENTITIES) return;
+  if (generations[e.index()] != e.generation()) return;
+  if (e.generation() % 2 == 1) return; // odd gen = dead, even = alive, 0 = invalid
+  free_indices[tail] = e.index();
+  // increment tail and recycled count
+  tail = (tail + 1) & MAX_ENTITIES_MASK;
+  recycled_count++;
+  // gen is incremented both when created and destroyed
+  // odd gen = dead, even = alive, 0 = invalid
+  generations[e.index()]++;
+}
+bool EntityManager::isValid(Entity e) const {
+  // if no recycled entities and next_fresh is max, entity is invalid
+  if (e.index() >= MAX_ENTITIES) return false;
+  if (e.generation() == 0) return false;  // generation 0 is invalid
+  return generations[e.index()] == e.generation();
+}
+uint32_t EntityManager::count() const {
+  return (next_fresh - recycled_count);
 }
 
-Entity EntityManager_Create(EntityRegistry &reg, uint16_t type, creVec2 pos,
-                            uint64_t initial_CompMask, uint64_t initial_flags) {
-  if (reg.free_count == 0)
-    return ENTITY_INVALID;
-
-  // Pop index from free list
-  uint32_t index = reg.free_list[--reg.free_count];
-  uint32_t gen = reg.generations[index];
-
-  // Set up the entity in SoA arrays
-  reg.component_masks[index] = initial_CompMask;
-  reg.state_flags[index] = initial_flags;
-  reg.types[index] = static_cast<uint16_t>(type);
-  reg.render_layer[index] = 0; // Keep these in mind
-  reg.batch_ids[index] = 0;    // **
-
-  // Position
-  reg.pos[index] = pos;
-
-  // Velocity (default zero)
-  reg.vel[index] = creVec2{0.0f, 0.0f};
-
-  // Size (default 64x64)
-  reg.size[index] = creVec2{64.0f, 64.0f};
-
-  // Physics specific
-  reg.inv_mass[index] = 0.0f;
-  reg.drag[index] = 0.0f;
-  reg.gravity_scale[index] = 0.0f;
-  reg.material_id[index] = 0;
-
-  // Rotation
-  reg.rotation[index] = 0.0f;
-
-  // Sprite specific
-  reg.sprite_ids[index] = 0;
-  reg.colors[index] = creBLANK;
-  reg.pivot[index] = creVec2{0.5f, 0.5f};
-  reg.visual_scale[index] = creVec2{1.0f, 1.0f};
-
-  // Animations
-  reg.anim_speeds[index] = 1.0f;
-  reg.anim_timers[index] = 0.0f;
-  reg.anim_finished[index] = false;
-
-  reg.active_count++;
-
-  // Track max used index for loop optimization
-  if (index >= reg.max_used_bound)
-    reg.max_used_bound = index + 1;
-
-  return Entity{.id = index, .generation = gen};
-}
-
-void EntityManager_Destroy(EntityRegistry &reg, Entity e) {
-
-  // Validate handle
-  if (e.id >= MAX_ENTITIES)
-    return;
-  if (!(reg.state_flags[e.id] & FLAG_ACTIVE))
-    return;
-  if (reg.generations[e.id] != e.generation)
-    return;
-
-  // Clear the slot
-  reg.component_masks[e.id] = COMP_NONE;
-  reg.state_flags[e.id] = 0;
-  reg.render_layer[e.id] = 0; // Keep these in mind**
-  reg.batch_ids[e.id] = 0;
-
-  // Increment generation to invalidate stale handles
-  reg.generations[e.id]++;
-
-  // Return slot to free list
-  reg.free_list[reg.free_count++] = e.id;
-  reg.active_count--;
-
-  // Note: We don't shrink max_used_bound here for simplicity.
-  // A more sophisticated implementation could track this.
-}
-
-void EntityManager_Shutdown(EntityRegistry &reg) {
-  memset(&reg, 0, sizeof(EntityRegistry));
-  Log(LogLevel::Info, "Entity Manager Shutdown");
+void EntityManager::shutdown() {
+  generations = nullptr;
+  free_indices = nullptr;
+  head = 0;
+  tail = 0;
+  recycled_count = 0;
+  next_fresh = 0;
+  LogSystem::Info("Entity Manager shutdown");
 }

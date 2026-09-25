@@ -21,7 +21,6 @@ static void EntitySystem_CopyPrototype(EntityRegistry *reg, uint32_t dst_id,
 
   reg->pos[dst_id] = reg->pos[src_id];
   reg->size[dst_id] = reg->size[src_id];
-  reg->rotation[dst_id] = reg->rotation[src_id];
 
   reg->component_masks[dst_id] = reg->component_masks[src_id];
   reg->state_flags[dst_id] = reg->state_flags[src_id] & ~CLONE_FLAGS_SCRUB_MASK;
@@ -29,27 +28,12 @@ static void EntitySystem_CopyPrototype(EntityRegistry *reg, uint32_t dst_id,
 
   reg->render_layer[dst_id] = reg->render_layer[src_id];
   reg->batch_ids[dst_id] = reg->batch_ids[src_id];
-  reg->sprite_ids[dst_id] = reg->sprite_ids[src_id];
   reg->colors[dst_id] = reg->colors[src_id];
   reg->pivot[dst_id] = reg->pivot[src_id];
   reg->visual_scale[dst_id] = reg->visual_scale[src_id];
 
-  reg->material_id[dst_id] = reg->material_id[src_id];
-  reg->drag[dst_id] = reg->drag[src_id];
-  reg->inv_mass[dst_id] = reg->inv_mass[src_id];
-  reg->gravity_scale[dst_id] = reg->gravity_scale[src_id];
-
-  reg->anim_speeds[dst_id] = reg->anim_speeds[src_id];
-  reg->anim_ids[dst_id] = reg->anim_ids[src_id];
-  reg->anim_base_durations[dst_id] = reg->anim_base_durations[src_id];
-  reg->anim_frame_counts[dst_id] = reg->anim_frame_counts[src_id];
-  reg->anim_start_sprites[dst_id] = reg->anim_start_sprites[src_id];
-  reg->anim_loops[dst_id] = reg->anim_loops[src_id];
-
   reg->pos[dst_id] = position;
-  reg->anim_timers[dst_id] = 0.0f;
-  reg->anim_frames[dst_id] = 0;
-  reg->anim_finished[dst_id] = false;
+
 
   reg->vel[dst_id] = creVec2{0.0f, 0.0f};
 

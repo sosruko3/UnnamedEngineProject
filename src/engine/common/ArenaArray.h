@@ -6,6 +6,7 @@
 // This data structure is for POD types only, not for classes with constructors/destructors.
 // Might have unintended behavior with non-POD types.
 // [DOIT]Add extra guardrails for release builds.
+// removed reset function, resize(0) is sufficent for such thing.
 
 template <typename T>
 struct ArenaArray {
@@ -14,6 +15,7 @@ struct ArenaArray {
   uint32_t cap_ = 0;
 
   bool init(Arena* arena, uint32_t capacity) { 
+    assert(data_ == nullptr && "this array is already initialized");
     if (!arena || capacity == 0)
       return false;
     data_ = arena->Push<T>(capacity);
@@ -61,9 +63,7 @@ struct ArenaArray {
   uint32_t size() const { return size_; }
   bool     empty()    const { return size_ == 0; }
   bool     full()     const { return size_ == cap_; }
-  // Resets the array to 0 size.
-  void     reset()          { size_ = 0; }
-  
+
   // operators[]
   T&       operator[](uint32_t i)       { assert(i < size_); return data_[i]; }
   const T& operator[](uint32_t i) const { assert(i < size_); return data_[i]; }

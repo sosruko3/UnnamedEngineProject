@@ -9,9 +9,9 @@
 // Using a fixed-size array for generations and free indices.
 // Custom allocation using Arena, no dynamic memory allocation.
 // destroy() is deferred. An entity is alive until the command bus is flushed. isValid() reflects this.
-
-constexpr uint32_t MAX_ENTITIES = 16384;
+// add assert for gen overflow.
 constexpr uint32_t MAX_ENTITIES_MASK = MAX_ENTITIES - 1;
+
 
 bool EntityManager::init(Arena* entityArena) {
   if (!entityArena) {
@@ -52,9 +52,13 @@ Entity EntityManager::create() {
 
 void EntityManager::destroy(Entity e) {
   // if stale, skip
-  if (e.index() >= MAX_ENTITIES) return;
-  if (generations[e.index()] != e.generation()) return;
-  if (e.generation() % 2 == 1) return; // odd gen = dead, even = alive, 0 = invalid
+  if (e.index() >= MAX_ENTITIES) 
+    return;
+  if (generations[e.index()] != e.generation()) 
+    return;
+  if (e.generation() % 2 == 1) 
+    return; // odd gen = dead, even = alive, 0 = invalid
+  
   free_indices[tail] = e.index();
   // increment tail and recycled count
   tail = (tail + 1) & MAX_ENTITIES_MASK;
@@ -65,8 +69,10 @@ void EntityManager::destroy(Entity e) {
 }
 bool EntityManager::isValid(Entity e) const {
   // if no recycled entities and next_fresh is max, entity is invalid
-  if (e.index() >= MAX_ENTITIES) return false;
-  if (e.generation() == 0) return false;  // generation 0 is invalid
+  if (e.index() >= MAX_ENTITIES) 
+    return false;
+  if (e.generation() == 0) 
+    return false;  // generation 0 is invalid
   return generations[e.index()] == e.generation();
 }
 uint32_t EntityManager::count() const {

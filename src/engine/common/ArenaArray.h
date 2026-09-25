@@ -10,15 +10,15 @@
 template <typename T>
 struct ArenaArray {
   T* data_ = nullptr; 
-  uint32_t size = 0;
-  uint32_t cap = 0;
+  uint32_t size_ = 0;
+  uint32_t cap_ = 0;
 
   bool init(Arena* arena, uint32_t capacity) { 
     if (!arena || capacity == 0)
       return false;
     data_ = arena->Push<T>(capacity);
-    size = 0;
-    cap = capacity;
+    size_ = 0;
+    cap_ = capacity;
     return true;
   }
   
@@ -28,49 +28,50 @@ struct ArenaArray {
 
   // Pushes an item onto the end of the array.
   void push(const T& item) { 
-    assert(size < cap);
-    data_[size++] = item;
+    assert(size_ < cap_);
+    data_[size_++] = item;
   }
   
   // Pops the last item off the array.
   void pop() {
-    assert(size > 0);
-    size--;
+    assert(size_ > 0);
+    size_--;
   }
   
   // Fills the array with the given item.
   void fill(const T& item) {
-    for (uint32_t i = 0; i < size; i++)
+    for (uint32_t i = 0; i < size_; i++)
       data_[i] = item;
   }
   
   // Fills the ENTIRE array with the given item.
   void fillAll(const T& item) {
-    for (uint32_t i = 0; i < cap; i++)
+    for (uint32_t i = 0; i < cap_; i++)
       data_[i] = item;
   }
   
   // Resizes the array to the given size.
   void resize(uint32_t newSize) { 
-    assert(newSize <= cap);
-    size = newSize;
+    assert(newSize <= cap_);
+    size_ = newSize;
   }
 
   // these return the capacity, size, and whether the array is empty or full.
-  uint32_t capacity() const { return cap; }
-  bool     empty()    const { return size == 0; }
-  bool     full()     const { return size == cap; }
+  uint32_t cap() const { return cap_; }
+  uint32_t size() const { return size_; }
+  bool     empty()    const { return size_ == 0; }
+  bool     full()     const { return size_ == cap_; }
   // Resets the array to 0 size.
-  void     reset()          { size = 0; }
+  void     reset()          { size_ = 0; }
   
   // operators[]
-  T&       operator[](uint32_t i)       { assert(i < size); return data_[i]; }
-  const T& operator[](uint32_t i) const { assert(i < size); return data_[i]; }
+  T&       operator[](uint32_t i)       { assert(i < size_); return data_[i]; }
+  const T& operator[](uint32_t i) const { assert(i < size_); return data_[i]; }
   
   // iterators
   T*       begin()       { return data_; }
-  T*       end()         { return data_ + size; }
+  T*       end()         { return data_ + size_; }
   const T* begin() const { return data_; }
-  const T* end()   const { return data_ + size; }
+  const T* end()   const { return data_ + size_; }
   
 };

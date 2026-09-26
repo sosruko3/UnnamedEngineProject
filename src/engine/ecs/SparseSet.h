@@ -92,6 +92,7 @@ struct SparseSet {
   [[nodiscard]] const T* end()   const { return components.end(); }
 
   // Wipe all components. Sparse must be reset for future queries.
+  // this is O(capacity) right now.
   void clear() {
     dense.resize(0);
     components.resize(0);

@@ -52,6 +52,7 @@ target_sources(
     src/engine/platform/TimeSystem.cpp
     src/engine/ecs/EntityManager.cpp
     src/engine/ecs/EntityAPI.cpp
+    src/engine/ecs/Registry.cpp
     src/engine/systems/audio/AudioSystem.cpp
     src/engine/systems/audio/AudioAPI.cpp
     src/engine/systems/animation/AnimationSystem.cpp

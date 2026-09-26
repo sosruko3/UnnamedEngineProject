@@ -26,7 +26,8 @@ struct SparseSet {
     // sparse needs max capacity from the start
     sparse.resize(capacity);
     // fill with invalid indices to start
-    sparse.fillAll(SPARSE_INVALID);
+    // this is removed due to lazy sparse set lookup
+    // sparse.fillAll(SPARSE_INVALID);
     return true;
   }
 
@@ -47,16 +48,22 @@ struct SparseSet {
       return false;
     }
     
+    
     uint32_t denseIndex = sparse[entityID];
     uint32_t lastDenseIndex = dense.size() - 1;
     uint32_t movedIndex = dense[lastDenseIndex];
+
+    // check if the dense index is valid and the entity ID matches
+    if (denseIndex >= dense.size() || dense[denseIndex] != entityID) {
+      return false;
+    }
     
     // move the last element to the removed index
     dense[denseIndex] = movedIndex;
     components[denseIndex] = components[lastDenseIndex];
     sparse[movedIndex] = denseIndex;
     // invalidate the removed index
-    sparse[entityID] = SPARSE_INVALID;
+    // sparse[entityID] = SPARSE_INVALID; // not needed anymore due to lazy lookup
     // remove the last element
     dense.pop();
     components.pop();
@@ -66,7 +73,9 @@ struct SparseSet {
   // check if the given entity ID has a component
   [[nodiscard]] bool has(uint32_t entityID) const {
     assert(entityID < sparse.size());
-    return sparse[entityID] != SPARSE_INVALID;
+    // Lazy sparse set lookup, check if the dense index is valid and the entity ID matches
+    uint32_t denseID = sparse[entityID];
+    return denseID < dense.size() && dense[denseID] == entityID;
   }
 
   // get the component for the given entity ID

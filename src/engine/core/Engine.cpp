@@ -4,7 +4,6 @@
 #include "engine/core/SystemPackets.h"
 #include "engine/common/EngineTypes.h"
 #include "engine/ecs/EntityManager.h"
-#include "engine/ecs/EntitySystem.h"
 #include "engine/scene/SceneManager.h"
 #include "engine/systems/audio/AudioSystem.h"
 #include "engine/systems/animation/AnimationSystem.h"
@@ -89,12 +88,11 @@ void Engine::EnginePhase4_Cleanup() {
 
 bool Engine::init(Arena* masterArena) {
   // SubArena Allocations, check this again, dont like how long it is.
-  entityArena = masterArena->Split(static_cast<size_t>(40 * 1024 * 1024), 64);  // 40MB
+  entityArena = masterArena->Split(static_cast<size_t>(256 * 1024 * 1024), 64);  // 256MB
   physicsArena = masterArena->Split(static_cast<size_t>(4 * 1024 * 1024), 64); // 4MB
   busArena = masterArena->Split(static_cast<size_t>(8 * 1024 * 1024), 64);     // 8MB
   audioArena = masterArena->Split(static_cast<size_t>(16 * 1024 * 1024), 64);  // 16MB
   frameArena = masterArena->Split(static_cast<size_t>(16 * 1024 * 1024), 64);  // 16MB
-  reg = entityArena.Push<EntityRegistry>();
   bus = busArena.Push<CommandBus>();
 
   if (!platform.init()) {

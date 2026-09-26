@@ -5,11 +5,11 @@
 #include <stdint.h>
 
 // Entity
-constexpr uint32_t ENTITY_INDEX_BITS = 18;
-constexpr uint32_t ENTITY_INDEX_MASK = (1u << ENTITY_INDEX_BITS) - 1;
-constexpr uint32_t MAX_ENTITIES       = 1u << ENTITY_INDEX_BITS;
-constexpr uint32_t GENERATION_BITS = 32 - ENTITY_INDEX_BITS;
-constexpr uint32_t GENERATION_MASK = (1u << GENERATION_BITS) - 1;
+inline constexpr uint32_t ENTITY_INDEX_BITS = 18;
+inline constexpr uint32_t ENTITY_INDEX_MASK = (1u << ENTITY_INDEX_BITS) - 1;
+inline constexpr uint32_t MAX_ENTITIES       = 1u << ENTITY_INDEX_BITS;
+inline constexpr uint32_t GENERATION_BITS = 32 - ENTITY_INDEX_BITS;
+inline constexpr uint32_t GENERATION_MASK = (1u << GENERATION_BITS) - 1;
 
 static_assert(ENTITY_INDEX_BITS + GENERATION_BITS == 32, "bits must sum to 32");
 static_assert(MAX_ENTITIES == (1u << ENTITY_INDEX_BITS), "ENTITY_MAX must be 2^bits");

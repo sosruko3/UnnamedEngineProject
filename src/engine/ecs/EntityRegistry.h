@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-constexpr uint64_t MAX_ENTITIES = 16500;
 constexpr uint64_t MAX_CAMERAS = 8;
 // These three will be removed soon, just temporary for systems to work.
 #define RENDER_BATCH_DEFAULT 0u

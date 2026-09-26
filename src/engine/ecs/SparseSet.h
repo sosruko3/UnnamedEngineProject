@@ -42,8 +42,10 @@ struct SparseSet {
   }
 
   // remove the component for the given entity ID
-  void remove(uint32_t entityID) {
-    assert(has(entityID) && "component does not exist");
+  bool remove(uint32_t entityID) {
+    if (!has(entityID)) {
+      return false;
+    }
     
     uint32_t denseIndex = sparse[entityID];
     uint32_t lastDenseIndex = dense.size() - 1;
@@ -58,6 +60,7 @@ struct SparseSet {
     // remove the last element
     dense.pop();
     components.pop();
+    return true;
   }
 
   // check if the given entity ID has a component

@@ -5,40 +5,49 @@
 #include "engine/ecs/EntityManager.h"
 #include "engine/ecs/SparseSet.h"
 
-#include <memory>
+#include <new>
 #include <stddef.h>
 #include <stdint.h>
 #include <type_traits>
 
 struct Registry {
+    // Registry maximum number of components
     static constexpr uint32_t MAX_COMPONENTS = 64;
 
-    // Owns the entity manager and registered component pools. The arena owns
-    // the storage referenced by these objects and arrays.
+    // Owns the entity manager and registered component pools. 
+    // The arena owns the storage referenced by these objects and arrays.
     EntityManager entityManager{};
     Arena* arena_ = nullptr;
     ComponentPool componentPools[MAX_COMPONENTS]{};
     uint32_t componentCount = 0;
 
+    // Initializes the registry with the given arena.
     [[nodiscard]] bool init(Arena* arena);
+
+    // Shuts down the registry, not freeing memory! free() only happens on main.cpp
     void shutdown();
 
+    // register component
     template <typename T>
     [[nodiscard]] bool registerComponent();
 
+    // returns the component pool for the given type, or nullptr if not registered.
     template <typename T>
     [[nodiscard]] SparseSet<T>* componentPool();
 
+    // const version of componentPool()
     template <typename T>
     [[nodiscard]] const SparseSet<T>* componentPool() const;
 
+    // entity creation/destruction/validation via EntityManager
     [[nodiscard]] Entity create();
     void destroy(Entity entity);
     [[nodiscard]] bool isValid(Entity entity) const;
 
+    // adds/remove/get/has via SparseSet
     template <typename T>
     [[nodiscard]] bool add(Entity entity, const T& component);
-
+    
     template <typename T>
     [[nodiscard]] bool remove(Entity entity);
 
@@ -54,11 +63,13 @@ struct Registry {
 
 template <typename T>
 bool Registry::registerComponent() {
+    // check if component is trivially copyable and destructible
     static_assert(std::is_trivially_copyable_v<T>,
                   "Arena-backed components must be trivially copyable");
     static_assert(std::is_trivially_destructible_v<T>,
                   "Arena-backed components must be trivially destructible");
 
+    // if arena is not bound, return false
     if (!arena_)
         return false;
 
@@ -77,12 +88,10 @@ bool Registry::registerComponent() {
     // allocate memory for the sparse set and its components
     // if allocation fails, rewound the arena and return false
     const size_t arenaMark = arena_->Mark();
-    auto* set = std::construct_at(arena_->Push<SparseSet<T>>());
+    // using ::new to initialize the sparse set
+    void* storage = arena_->Push<SparseSet<T>>();
+    auto* set = ::new (storage) SparseSet<T>{};
     
-    if (!set) {
-        arena_->Rewind(arenaMark);
-        return false;
-    }
     if (!set->init(arena_, MAX_ENTITIES)) {
         arena_->Rewind(arenaMark);
         return false;
@@ -98,10 +107,12 @@ SparseSet<T>* Registry::componentPool() {
     if (!arena_)
         return nullptr;
 
+    // find the id of the component
     const uint32_t typeId = TypeId<T>::value();
     if (typeId >= MAX_COMPONENTS)
         return nullptr;
 
+    // return the component pool if it exists
     ComponentPool& pool = componentPools[typeId];
     if (!pool.set || pool.type_id != typeId)
         return nullptr;
@@ -109,6 +120,7 @@ SparseSet<T>* Registry::componentPool() {
     return static_cast<SparseSet<T>*>(pool.set);
 }
 
+// const version of componentPool
 template <typename T>
 const SparseSet<T>* Registry::componentPool() const {
     if (!arena_)
@@ -127,12 +139,14 @@ const SparseSet<T>* Registry::componentPool() const {
 
 template <typename T>
 bool Registry::add(Entity entity, const T& component) {
+    // check if entity is valid, and if it already has the component
     if (!isValid(entity))
         return false;
     if (has<T>(entity))
         return false;
 
     SparseSet<T>* pool = componentPool<T>();
+    // check if pool exists, and if not, return false
     if (!pool)
         return false;
 
@@ -142,36 +156,50 @@ bool Registry::add(Entity entity, const T& component) {
 
 template <typename T>
 bool Registry::remove(Entity entity) {
+    // check if entity is valid
     if (!isValid(entity))
         return false;
 
     SparseSet<T>* pool = componentPool<T>();
-    return pool && pool->remove(entity.index());
+    // check if pool exists, and if not, return false
+    if (!pool)
+        return false;
+    // remove the component from the pool
+    return pool->remove(entity.index());
 }
 
 template <typename T>
 T* Registry::get(Entity entity) {
+    // check if entity is valid
     if (!isValid(entity))
         return nullptr;
 
     SparseSet<T>* pool = componentPool<T>();
+    // check if pool exists, and if not, return nullptr
     return pool ? pool->get(entity.index()) : nullptr;
 }
 
 template <typename T>
 const T* Registry::get(Entity entity) const {
+    // check if entity is valid
     if (!isValid(entity))
         return nullptr;
 
     const SparseSet<T>* pool = componentPool<T>();
+    // check if pool exists, and if not, return nullptr
     return pool ? pool->get(entity.index()) : nullptr;
 }
 
 template <typename T>
 bool Registry::has(Entity entity) const {
+    // check if entity is valid
     if (!isValid(entity))
         return false;
 
     const SparseSet<T>* pool = componentPool<T>();
-    return pool && pool->has(entity.index());
+    // check if pool exists, and if not, return false
+    if (!pool)
+        return false;
+    // check if the entity has the component
+    return pool->has(entity.index());
 }

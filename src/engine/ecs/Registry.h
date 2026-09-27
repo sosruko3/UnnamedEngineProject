@@ -5,7 +5,8 @@
 #include "engine/ecs/EntityManager.h"
 #include "engine/ecs/SparseSet.h"
 
-#include <new>
+// false warning here
+#include <new> // IWYU pragma: keep
 #include <stddef.h>
 #include <stdint.h>
 #include <type_traits>

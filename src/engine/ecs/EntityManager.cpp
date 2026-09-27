@@ -75,6 +75,12 @@ bool EntityManager::isValid(Entity e) const {
     return false;  // generation 0 is invalid
   return generations[e.index()] == e.generation();
 }
+
+Entity EntityManager::getEntity(uint32_t entityID) const {
+  assert(entityID < MAX_ENTITIES);
+  return Entity{entityID | (generations[entityID] << ENTITY_INDEX_BITS)};
+}
+
 uint32_t EntityManager::count() const {
   return (next_fresh - recycled_count);
 }

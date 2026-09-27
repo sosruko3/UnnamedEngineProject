@@ -16,6 +16,7 @@ struct EntityManager {
     Entity create(); // instant
     void destroy(Entity e); 
     bool isValid(Entity e) const;
+    Entity getEntity(uint32_t entityID) const;
     uint32_t count() const;
     void clear(); // skip implementation for now.
     void shutdown();

@@ -93,8 +93,8 @@ struct SparseSet {
       return dense.size(); // same size for dense and components
   }
 
-  [[nodiscard]] uint32_t entity_at(uint32_t dense_idx) const {
-      return dense[dense_idx];
+  [[nodiscard]] uint32_t entity_at(uint32_t denseID) const {
+      return dense[denseID];
   }
   
   // get an iterator to the beginning of the components

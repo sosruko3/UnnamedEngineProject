@@ -1,8 +1,6 @@
 #pragma once
 #include "engine/common/ArenaArray.h"
 
-inline constexpr uint32_t SPARSE_INVALID = UINT32_MAX;
-
 template <typename T>
 struct SparseSet {
   // sparse: maps entity ID to dense index
@@ -25,9 +23,6 @@ struct SparseSet {
 
     // sparse needs max capacity from the start
     sparse.resize(capacity);
-    // fill with invalid indices to start
-    // this is removed due to lazy sparse set lookup
-    // sparse.fillAll(SPARSE_INVALID);
     return true;
   }
 
@@ -63,7 +58,7 @@ struct SparseSet {
     components[denseIndex] = components[lastDenseIndex];
     sparse[movedIndex] = denseIndex;
     // invalidate the removed index
-    // sparse[entityID] = SPARSE_INVALID; // not needed anymore due to lazy lookup
+    sparse[entityID] = 0; // we can just leave it as 0, memory is zero-initialized.
     // remove the last element
     dense.pop();
     components.pop();
@@ -108,6 +103,5 @@ struct SparseSet {
   void clear() {
     dense.resize(0);
     components.resize(0);
-    sparse.fillAll(SPARSE_INVALID);
   }
 };

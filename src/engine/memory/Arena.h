@@ -13,7 +13,7 @@ struct Arena {
     uint8_t* base_ptr = nullptr;
     size_t   capacity = 0;
     size_t   offset   = 0;
-
+    size_t   highest_offset = 0;
     // Point this arena at an existing block of memory. Does not allocate.
     // For master arena, called by ArenaAllocate. For sub-arenas, called by Split.
     void Bind(void* memory, size_t cap);
@@ -30,7 +30,7 @@ struct Arena {
     // Bytes remaining from current offset to capacity.
     size_t Remaining() const;
 
-    // Carve a sub-arena out of this arena. The child is zeroed.
+    // Carve a sub-arena out of this arena.
     // Use parent's alignment unless you have a reason not to.
     Arena Split(size_t split_size, size_t alignment = MASTER_ARENA_ALIGNMENT);
 

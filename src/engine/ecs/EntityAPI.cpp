@@ -3,7 +3,9 @@
 #include "engine/core/CommandBus.h"
 #include "engine/core/LogSystem.h"
 #include <assert.h>
-
+// FIX THIS FILE LATER ON
+/*
+ 
 Entity entityAPI_ReserveSlot(EntityRegistry &reg) {
   return EntityManager_ReserveSlot(reg);
 }
@@ -154,3 +156,5 @@ void entityAPI_Clone(EntityRegistry &reg, CommandBus &bus, Entity dst,
     Log(LogLevel::Warning, "entityAPI_Clone: CommandBus is full! Slot returned.");
   }
 }
+
+ */

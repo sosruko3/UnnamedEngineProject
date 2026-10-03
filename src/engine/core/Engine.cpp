@@ -37,10 +37,7 @@ void Engine::EnginePhase2_Simulation() {
   bus->current_phase = BUS_PHASE_SIMULATION;
 #endif
 
-  entityPacket entityPkt = CreateEntityPacket(reg, bus);
-  //animPacket animPkt = CreateAnimPacket(reg, bus, time->gameDt);
-
-  EntitySystem_Update(&entityPkt);
+  //EntitySystem_Update(&entityPkt);
 
   while (timeSystem.consumeFixedStep()) {
     //PhysicsSystem_Update(&physicsPkt);
@@ -118,7 +115,7 @@ bool Engine::init(Arena* masterArena) {
     return false;
   }
   CommandBus_Init(*bus);
-  EntityManager_Init(*reg);
+  //EntityManager_Init(*reg);
   //Asset_Init();
 
   //rendererCore_Init(v.width, v.height);
@@ -154,7 +151,7 @@ void Engine::run() {
 void Engine::shutdown() {
   LogSystem::Info("Engine Shutting down...");
   SceneManager_Shutdown(*reg, *bus);
-  EntityManager_Shutdown(*reg);
+  //EntityManager_Shutdown(*reg);
   audioSystem_Shutdown();
 
   // Shutdown should be in reverse order of initialization.

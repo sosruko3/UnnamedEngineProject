@@ -12,7 +12,7 @@ Arena ArenaAllocate(size_t capacity) {
     size_t aligned_capacity = (capacity + MASTER_ARENA_ALIGNMENT - 1) & ~(MASTER_ARENA_ALIGNMENT - 1);
     void* raw_memory = std::aligned_alloc(MASTER_ARENA_ALIGNMENT, aligned_capacity);
     if (!raw_memory) {
-        Log(LogLevel::Error, "[ARENA] Failed to allocate memory!");
+        LogSystem::Error("[ARENA] Failed to allocate memory!");
         return {};
     }
 

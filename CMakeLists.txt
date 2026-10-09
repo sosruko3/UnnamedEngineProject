@@ -4,7 +4,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   Please run 'cmake -B build' and 'cmake --build build'.")
 endif()
 
-project(unNamedEngine VERSION 0.01 LANGUAGES CXX)
+project(unNamedEngine VERSION 0.02 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -107,7 +107,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         -Wimplicit-fallthrough -Wundef -Wformat=2
         -fsanitize=address,undefined
         -fno-omit-frame-pointer
-        -Wshadow -Wswitch-enum
+        -Wshadow -Wswitch
         -Wundef -Wformat=2
         -Wconversion -Wsign-conversion
         -Wold-style-cast -Wcast-qual

@@ -42,9 +42,12 @@ void Platform::shutdown() {
         s_allocatedPrefPath = nullptr;
         s_prefPath = "";
     }
-    
+
+    LogSystem::Info("Shutting down platform");
     SDL_Quit();
     s_platformInitialized = false;
+    LogSystem::Info("Shutdown complete Platform.");
+    
 }
 
 uint64_t Platform::getTicksNS() {

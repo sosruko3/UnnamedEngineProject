@@ -8,6 +8,8 @@
 // [DOIT]Add extra guardrails for release builds.
 // removed reset function, resize(0) is sufficent for such thing.
 
+// also consider adding typename U for capacity, 
+// instead of getting it by init's param, though current one makes init more unforgetable
 template <typename T>
 struct ArenaArray {
   T* data_ = nullptr; 

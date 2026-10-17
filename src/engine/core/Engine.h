@@ -6,7 +6,7 @@
 #include "engine/platform/TimeSystem.h"
 #include "engine/memory/Arena.h"
 
-struct EntityRegistry;
+struct Registry;
 struct CommandBus;
 union SDL_Event;
 
@@ -23,6 +23,7 @@ public:
     void EnginePhase2_Simulation();
     void EnginePhase3_RenderState();
     void EnginePhase4_Cleanup();
+    void processAllCommands();
     
 private:
     const char* title = "";
@@ -31,7 +32,7 @@ private:
     WindowSystem windowSystem;
     InputSystem inputSystem;
     TimeSystem timeSystem;
-    EntityRegistry *reg;
+    Registry *reg;
     CommandBus *bus;
     
     Arena entityArena;

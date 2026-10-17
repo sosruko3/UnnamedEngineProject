@@ -44,6 +44,7 @@ target_sources(
     src/engine/core/Engine.cpp
     src/engine/core/LogSystem.cpp
     src/engine/core/CommandBus.cpp
+    src/engine/core/CommandIndex.cpp
     src/engine/platform/WindowSystem.cpp
     src/engine/memory/Arena.cpp
     src/engine/scene/SceneManager.cpp
@@ -90,8 +91,6 @@ target_include_directories(
   ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(
   ${PROJECT_NAME} PRIVATE miniaudio_lib fmt::fmt spdlog::spdlog SDL3::SDL3)
-
-
 
 # Debug and Release modes
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

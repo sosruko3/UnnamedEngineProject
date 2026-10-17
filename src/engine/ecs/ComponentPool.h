@@ -36,11 +36,11 @@ template <typename T>
     return ComponentPool{
       .set = set,
       .type_id = TypeId<T>::value(),
-      .remove = [](void* set, uint32_t entityID) {
-        return static_cast<SparseSet<T>*>(set)->remove(entityID);
+      .remove = [](void* set_, uint32_t entityID) {
+        return static_cast<SparseSet<T>*>(set_)->remove(entityID);
       },
-      .clear = [](void* set) {
-        static_cast<SparseSet<T>*>(set)->clear();
+      .clear = [](void* set_) {
+        static_cast<SparseSet<T>*>(set_)->clear();
       }
     };
 }

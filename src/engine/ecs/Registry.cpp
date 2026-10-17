@@ -1,5 +1,6 @@
 #include "Registry.h"
 
+
 bool Registry::init(Arena* arena) {
     if (!arena)
         return false;
@@ -15,6 +16,20 @@ bool Registry::init(Arena* arena) {
 
     arena_ = arena;
     return true;
+}
+
+Registry* Registry::createRegistry(Arena* arena) {
+    if (arena == nullptr) return nullptr;
+    // Allocate memory and initialize the Registry.
+    auto* storage = arena->Push<Registry>();
+    auto* reg = ::new (storage) Registry{};
+    if (!reg) return nullptr;
+    // Initialize the Registry buffer and variables.
+    if (!reg->init(arena)) {
+        ::delete reg;
+        return nullptr;
+    }
+    return reg;
 }
 
 void Registry::shutdown() {

@@ -22,6 +22,8 @@ struct Registry {
     ComponentPool componentPools[MAX_COMPONENTS]{};
     uint32_t componentCount = 0;
 
+    static Registry* createRegistry(Arena* arena);
+
     // Initializes the registry with the given arena.
     [[nodiscard]] bool init(Arena* arena);
 

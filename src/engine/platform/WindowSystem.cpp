@@ -33,6 +33,7 @@ void WindowSystem::shutdown() {
         window = nullptr;
     }
     initialized = false;
+    LogSystem::Info("Shutdown complete WindowSystem.");
 }
 void WindowSystem::handleEvent(const SDL_Event& event) {
     // TODO: All window events

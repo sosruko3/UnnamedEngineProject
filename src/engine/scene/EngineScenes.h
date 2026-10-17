@@ -1,11 +1,11 @@
 #pragma once
-struct EntityRegistry;
+struct Registry;
 struct CommandBus;
 
 struct Scene {
-  void (*Init)(EntityRegistry &reg, CommandBus &bus);
-  void (*Update)(EntityRegistry &reg, CommandBus &bus, float dt);
-  void (*Draw)(EntityRegistry &reg, CommandBus &bus);
-  void (*Unload)(EntityRegistry &reg, CommandBus &bus);
+  void (*Init)(Registry &reg, CommandBus &bus);
+  void (*Update)(Registry &reg, CommandBus &bus, float dt);
+  void (*Draw)(Registry &reg, CommandBus &bus);
+  void (*Unload)(Registry &reg, CommandBus &bus);
 };
 

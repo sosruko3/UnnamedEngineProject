@@ -5,7 +5,6 @@
 
 struct EntityRegistry;
 struct CommandBus;
-struct animPacket;
 
-void AnimationSystem_ProcessCommands(animPacket *packet);
+void AnimationSystem_ProcessCommands(CommandBus& bus);
 void AnimationSystem_Update();

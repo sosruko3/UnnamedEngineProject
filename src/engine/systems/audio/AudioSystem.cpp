@@ -73,7 +73,7 @@ void audioSystem_Init(void) {
 
   ma_result result = ma_resource_manager_init(&rmConfig, &s_resourceManager);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Error, "[AUDIO] Resource Manager init failed (err={})",
+    LogSystem::Error("[AUDIO] Resource Manager init failed (err={})",
         static_cast<int32_t>(result));
     return;
   }
@@ -83,7 +83,7 @@ void audioSystem_Init(void) {
 
   result = ma_engine_init(&engineConfig, &s_audioEngine);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] ma_engine_init failed (err={})",
+    LogSystem::Error("[AUDIO] ma_engine_init failed (err={})",
         static_cast<int32_t>(result));
     ma_resource_manager_uninit(&s_resourceManager);
     return;
@@ -105,75 +105,68 @@ void audioSystem_Init(void) {
 void audioSystem_Update(CommandBus &bus) { audioSystem_ProcessCommands(bus); }
 
 void audioSystem_ProcessCommands(CommandBus &bus) {
-
-  CommandIterator iter = CommandBus_GetIterator(bus);
-  const Command *cmd;
-
-  while (CommandBus_Next(bus, &iter, &cmd)) {
-    if ((cmd->type & CMD_DOMAIN_MASK) != CMD_DOMAIN_AUDIO) {
-      continue;
-    }
-
-    switch (cmd->type) {
-    case CMD_AUDIO_GROUP_INIT:
-      audio_GroupInit(static_cast<AudioGroupID>(cmd->u8.value));
+  for (const Command& cmd : bus.commandsOf(Domain::Audio)) {
+    
+    switch (cmd.type) {
+    case CommandType::AUDIO_GROUP_INIT:
+      audio_GroupInit(static_cast<AudioGroupID>(cmd.u8.value));
       break;
-    case CMD_AUDIO_SET_MASTER_VOLUME:
-      audio_SetMasterVolume(cmd->f32.value);
+    case CommandType::AUDIO_SET_MASTER_VOLUME:
+      audio_SetMasterVolume(cmd.f32.value);
       break;
-    case CMD_AUDIO_SET_LISTENER_POSITION:
-      audio_ListenerSetPosition(cmd->vec2.value.x, cmd->vec2.value.y);
+    case CommandType::AUDIO_SET_LISTENER_POSITION:
+      audio_ListenerSetPosition(cmd.vec2.value.x, cmd.vec2.value.y);
       break;
-    case CMD_AUDIO_GROUP_SET_VOLUME:
-      audio_GroupSetVolume(cmd->audiogroup.groupID, cmd->audiogroup.value);
+    case CommandType::AUDIO_GROUP_SET_VOLUME:
+      audio_GroupSetVolume(cmd.audiogroup.groupID, cmd.audiogroup.value);
       break;
-    case CMD_AUDIO_GROUP_SET_PITCH:
-      audio_GroupSetPitch(cmd->audiogroup.groupID, cmd->audiogroup.value);
+    case CommandType::AUDIO_GROUP_SET_PITCH:
+      audio_GroupSetPitch(cmd.audiogroup.groupID, cmd.audiogroup.value);
       break;
-    case CMD_AUDIO_GROUP_SET_PAN:
-      audio_GroupSetPan(cmd->audiogroup.groupID, cmd->audiogroup.value);
+    case CommandType::AUDIO_GROUP_SET_PAN:
+      audio_GroupSetPan(cmd.audiogroup.groupID, cmd.audiogroup.value);
       break;
-    case CMD_AUDIO_PLAY_ONESHOT:
-      audio_PlayOneShot(cmd->audioshot.sourceid, cmd->audioshot.groupid);
+    case CommandType::AUDIO_PLAY_ONESHOT:
+      audio_PlayOneShot(cmd.audioshot.sourceid, cmd.audioshot.groupid);
       break;
-    case CMD_AUDIO_SOUND_LOAD:
-      audio_SoundLoad(cmd->audioload.id, cmd->audioload.sourceID,
-                      cmd->audioload.groupID, cmd->audioload.usageType);
+    case CommandType::AUDIO_SOUND_LOAD:
+      audio_SoundLoad(cmd.audioload.id, cmd.audioload.sourceID,
+                      cmd.audioload.groupID, cmd.audioload.usageType);
       break;
-    case CMD_AUDIO_SOUND_UNLOAD:
-      audio_SoundUnload(cmd->audioid.id);
+    case CommandType::AUDIO_SOUND_UNLOAD:
+      audio_SoundUnload(cmd.audioid.id);
       break;
-    case CMD_AUDIO_SOUND_PLAY:
-      audio_SoundPlay(cmd->audioid.id);
+    case CommandType::AUDIO_SOUND_PLAY:
+      audio_SoundPlay(cmd.audioid.id);
       break;
-    case CMD_AUDIO_SOUND_PAUSE:
-      audio_SoundPause(cmd->audioid.id);
+    case CommandType::AUDIO_SOUND_PAUSE:
+      audio_SoundPause(cmd.audioid.id);
       break;
-    case CMD_AUDIO_SOUND_STOP:
-      audio_SoundStop(cmd->audioid.id);
+    case CommandType::AUDIO_SOUND_STOP:
+      audio_SoundStop(cmd.audioid.id);
       break;
-    case CMD_AUDIO_SOUND_SET_VOLUME:
-      audio_SoundSetVolume(cmd->audiof32.id, cmd->audiof32.value);
+    case CommandType::AUDIO_SOUND_SET_VOLUME:
+      audio_SoundSetVolume(cmd.audiof32.id, cmd.audiof32.value);
       break;
-    case CMD_AUDIO_SOUND_SET_PITCH:
-      audio_SoundSetPitch(cmd->audiof32.id, cmd->audiof32.value);
+    case CommandType::AUDIO_SOUND_SET_PITCH:
+      audio_SoundSetPitch(cmd.audiof32.id, cmd.audiof32.value);
       break;
-    case CMD_AUDIO_SOUND_SET_PAN:
-      audio_SoundSetPan(cmd->audiof32.id, cmd->audiof32.value);
+    case CommandType::AUDIO_SOUND_SET_PAN:
+      audio_SoundSetPan(cmd.audiof32.id, cmd.audiof32.value);
       break;
-    case CMD_AUDIO_SOUND_SET_LOOPING:
-      audio_SoundSetLooping(cmd->audiob8.id, cmd->audiob8.value);
+    case CommandType::AUDIO_SOUND_SET_LOOPING:
+      audio_SoundSetLooping(cmd.audiob8.id, cmd.audiob8.value);
       break;
-    case CMD_AUDIO_SOUND_SET_SPATIALIZATION:
-      audio_SoundSetSpatialization(cmd->audiob8.id, cmd->audiob8.value);
+    case CommandType::AUDIO_SOUND_SET_SPATIALIZATION:
+      audio_SoundSetSpatialization(cmd.audiob8.id, cmd.audiob8.value);
       break;
-    case CMD_AUDIO_SOUND_SET_POSITION:
-      audio_SoundSetPosition(cmd->audiovec2.id, cmd->audiovec2.value.x,
-                             cmd->audiovec2.value.y);
+    case CommandType::AUDIO_SOUND_SET_POSITION:
+      audio_SoundSetPosition(cmd.audiovec2.id, cmd.audiovec2.value.x,
+                             cmd.audiovec2.value.y);
       break;
-    case CMD_AUDIO_SOUND_SET_ATTENUATION:
-      audio_SoundSetAttenuation(cmd->audiovec2.id, cmd->audiovec2.value.x,
-                                cmd->audiovec2.value.y);
+    case CommandType::AUDIO_SOUND_SET_ATTENUATION:
+      audio_SoundSetAttenuation(cmd.audiovec2.id, cmd.audiovec2.value.x,
+                                cmd.audiovec2.value.y);
       break;
     default:
       break;
@@ -208,7 +201,7 @@ void audioSystem_Shutdown(void) {
 /* Section 3: Internal Guardrail Functions */
 static bool audio_ValidateUsage(AudioUsageType usage) {
   if (static_cast<uint32_t>(usage) >= AUDIO_USAGE_COUNT) {
-    Log(LogLevel::Warning, "[AUDIO] Invalid usage enum: {}",
+    LogSystem::Warning("[AUDIO] Invalid usage enum: {}",
         static_cast<unsigned>(usage));
     return false;
   }
@@ -218,7 +211,7 @@ static bool audio_ValidateUsage(AudioUsageType usage) {
 
 static bool audio_ValidateGroupID(AudioGroupID groupID) {
   if (groupID >= AUDIO_GROUP_COUNT) {
-    Log(LogLevel::Warning, "[AUDIO] Group ID out of bounds: {}",
+    LogSystem::Warning("[AUDIO] Group ID out of bounds: {}",
         static_cast<unsigned>(groupID));
     return false;
   }
@@ -232,13 +225,13 @@ static bool audio_ValidateSoundID(AudioID id, uint16_t *outIndex,
   const uint16_t generation = id.gen;
 
   if (index >= AUDIO_SOUND_POOL_CAPACITY) {
-    Log(LogLevel::Warning, "[AUDIO] Sound ID index out of bounds: {}",
+    LogSystem::Warning("[AUDIO] Sound ID index out of bounds: {}",
         static_cast<unsigned>(index));
     return false;
   }
 
   if (generation != s_soundGeneration[index]) {
-    Log(LogLevel::Warning,
+    LogSystem::Warning(
         "[AUDIO] Stale sound handle. idx={} gen={} expected={}",
         static_cast<unsigned>(index), static_cast<unsigned>(generation),
         static_cast<unsigned>(s_soundGeneration[index]));
@@ -246,7 +239,7 @@ static bool audio_ValidateSoundID(AudioID id, uint16_t *outIndex,
   }
 
   if (requireLoaded && !s_soundLoaded[index]) {
-    Log(LogLevel::Warning, "[AUDIO] Sound slot is not loaded. idx={}",
+    LogSystem::Warning("[AUDIO] Sound slot is not loaded. idx={}",
         static_cast<unsigned>(index));
     return false;
   }
@@ -257,7 +250,7 @@ static bool audio_ValidateSoundID(AudioID id, uint16_t *outIndex,
 
 AudioID audioSystem_AllocateID(void) {
   if (s_freeTop < 0) {
-    Log(LogLevel::Error, "[AUDIO] Pool exhausted! No free slots.");
+    LogSystem::Error("[AUDIO] Pool exhausted! No free slots.");
     return AudioID{.index = 0, .gen = 0xFFFF};
   }
   uint16_t index = s_freeIndices[s_freeTop--];
@@ -285,7 +278,7 @@ static void audio_GroupInit(AudioGroupID groupID) {
   }
 
   if (s_groupInitialized[groupID]) {
-    Log(LogLevel::Warning, "[AUDIO] Group already initialized: {}",
+    LogSystem::Warning("[AUDIO] Group already initialized: {}",
         static_cast<unsigned>(groupID));
     return;
   }
@@ -293,7 +286,7 @@ static void audio_GroupInit(AudioGroupID groupID) {
   const ma_result result =
       ma_sound_group_init(&s_audioEngine, 0, nullptr, &s_groups[groupID]);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] Failed to init group {} (err={})",
+    LogSystem::Warning("[AUDIO] Failed to init group {} (err={})",
         static_cast<unsigned>(groupID), static_cast<int>(result));
     return;
   }
@@ -305,7 +298,7 @@ static void audio_GroupSetVolume(AudioGroupID groupID, float vol) {
   assert(s_audioInitialized && "Audio system is not initalized.");
 
   if (!audio_ValidateGroupID(groupID) || !s_groupInitialized[groupID]) {
-    Log(LogLevel::Warning,
+    LogSystem::Warning(
         "[AUDIO] Group volume set on uninitialized group: {}",
         static_cast<unsigned>(groupID));
     return;
@@ -318,7 +311,7 @@ static void audio_GroupSetPitch(AudioGroupID groupID, float pitch) {
   assert(s_audioInitialized && "Audio system is not initalized.");
 
   if (!audio_ValidateGroupID(groupID) || !s_groupInitialized[groupID]) {
-    Log(LogLevel::Warning, "[AUDIO] Group pitch set on uninitialized group: {}",
+    LogSystem::Warning("[AUDIO] Group pitch set on uninitialized group: {}",
         static_cast<unsigned>(groupID));
     return;
   }
@@ -330,7 +323,7 @@ static void audio_GroupSetPan(AudioGroupID groupID, float pan) {
   assert(s_audioInitialized && "Audio system is not initalized.");
 
   if (!audio_ValidateGroupID(groupID) || !s_groupInitialized[groupID]) {
-    Log(LogLevel::Warning, "[AUDIO] Group pan set on uninitialized group: {}",
+    LogSystem::Warning("[AUDIO] Group pan set on uninitialized group: {}",
         static_cast<unsigned>(groupID));
     return;
   }
@@ -344,7 +337,7 @@ static void audio_PlayOneShot(AudioSourceID sourceID, AudioGroupID groupID) {
          "Group must be initialized before use!");
 
   if (sourceID >= AUDIO_SOURCE_COUNT) {
-    Log(LogLevel::Warning, "[AUDIO] Invalid source ID: {}",
+    LogSystem::Warning("[AUDIO] Invalid source ID: {}",
         static_cast<unsigned>(sourceID));
     return;
   }
@@ -354,7 +347,7 @@ static void audio_PlayOneShot(AudioSourceID sourceID, AudioGroupID groupID) {
       ma_engine_play_sound(&s_audioEngine, filepath, &s_groups[groupID]);
 
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] One-shot play failed: {} (err={})",
+    LogSystem::Warning("[AUDIO] One-shot play failed: {} (err={})",
         filepath, static_cast<int>(result));
   }
 }
@@ -367,7 +360,7 @@ static void audio_SoundLoad(AudioID id, AudioSourceID sourceID,
          "Group must be initialized before use!");
 
   if (sourceID >= AUDIO_SOURCE_COUNT) {
-    Log(LogLevel::Warning, "[AUDIO] Invalid source ID: {}",
+    LogSystem::Warning("[AUDIO] Invalid source ID: {}",
         static_cast<unsigned>(sourceID));
     return;
   }
@@ -377,7 +370,7 @@ static void audio_SoundLoad(AudioID id, AudioSourceID sourceID,
   }
 
   if (s_soundLoaded[slot]) {
-    Log(LogLevel::Warning, "[AUDIO] Reloading loaded sound slot: {}",
+    LogSystem::Warning("[AUDIO] Reloading loaded sound slot: {}",
         static_cast<unsigned>(slot));
     ma_sound_uninit(&s_soundPool[slot]);
     s_soundLoaded[slot] = false;
@@ -390,7 +383,7 @@ static void audio_SoundLoad(AudioID id, AudioSourceID sourceID,
                               &s_groups[groupID], nullptr, &s_soundPool[slot]);
 
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] Failed to load sound idx={} path={} err={}",
+    LogSystem::Warning("[AUDIO] Failed to load sound idx={} path={} err={}",
         static_cast<unsigned>(slot), filepath, static_cast<int>(result));
     return;
   }
@@ -422,7 +415,7 @@ static void audio_SoundPlay(AudioID id) {
 
   const ma_result result = ma_sound_start(&s_soundPool[slot]);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] Failed to start sound idx={} err={}",
+    LogSystem::Warning("[AUDIO] Failed to start sound idx={} err={}",
         static_cast<unsigned>(slot), static_cast<int>(result));
   }
 }
@@ -437,7 +430,7 @@ static void audio_SoundPause(AudioID id) {
 
   const ma_result result = ma_sound_stop(&s_soundPool[slot]);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] Failed to pause sound idx={} err={}",
+    LogSystem::Warning("[AUDIO] Failed to pause sound idx={} err={}",
         static_cast<unsigned>(slot), static_cast<int>(result));
   }
 }
@@ -452,14 +445,14 @@ static void audio_SoundStop(AudioID id) {
 
   ma_result result = ma_sound_stop(&s_soundPool[slot]);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] Failed to stop sound idx={} err={}",
+    LogSystem::Warning("[AUDIO] Failed to stop sound idx={} err={}",
         static_cast<unsigned>(slot), static_cast<int>(result));
     return;
   }
 
   result = ma_sound_seek_to_pcm_frame(&s_soundPool[slot], 0);
   if (result != MA_SUCCESS) {
-    Log(LogLevel::Warning, "[AUDIO] Failed to rewind sound idx={} err={}",
+    LogSystem::Warning("[AUDIO] Failed to rewind sound idx={} err={}",
         static_cast<unsigned>(slot), static_cast<int>(result));
   }
 }
@@ -540,7 +533,7 @@ static void audio_SoundSetAttenuation(AudioID id, float min, float max) {
   }
 
   if (min < 0.0f || max < 0.0f || min > max) {
-    Log(LogLevel::Warning, "[AUDIO] Invalid attenuation min={:.3f} max={:.3f}",
+    LogSystem::Warning("[AUDIO] Invalid attenuation min={:.3f} max={:.3f}",
         static_cast<double>(min), static_cast<double>(max));
     return;
   }

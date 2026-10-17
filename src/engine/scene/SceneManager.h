@@ -3,7 +3,7 @@
 #include "EngineScenes.h"
 #include <stdint.h>
 
-struct EntityRegistry;
+struct Registry;
 struct CommandBus;
 struct scenePacket;
 
@@ -17,7 +17,7 @@ void SceneManager_Update(scenePacket *packet);
 void SceneManager_Draw(scenePacket *packet);
 
 // Clean up whatever scene is currently active
-void SceneManager_Shutdown(EntityRegistry &reg, CommandBus &bus);
+void SceneManager_Shutdown(Registry &reg, CommandBus &bus);
 
 // Switch scenes
 void SceneManager_ChangeScene(int32_t nextState);

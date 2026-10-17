@@ -1,7 +1,8 @@
 #include "SceneManager.h"
 #include "engine/core/LogSystem.h"
 #include "engine/core/SystemPackets.h"
-#include "engine/ecs/EntitySystem.h"
+//#include "engine/ecs/EntitySystem.h"
+#include "engine/ecs/Registry.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -20,7 +21,7 @@ static SceneManagerContext ctx = {.currentScene = {},
                                   .isSwitchPending = false,
                                   .factory = nullptr};
 
-scenePacket CreateScenePacket(EntityRegistry *reg, CommandBus *bus, float dt) {
+scenePacket CreateScenePacket(Registry *reg, CommandBus *bus, float dt) {
   scenePacket pkt = {.reg = reg, .bus = bus, .gameDt = dt};
   return pkt;
 }
@@ -29,7 +30,7 @@ void SceneManager_Init(SceneFactory factory) {
   ctx.factory = factory;
   ctx.activeState = -1;
   ctx.isSwitchPending = false;
-  Log(LogLevel::Info, "Scene Manager Initialized.");
+  LogSystem::Info("Scene Manager Initialized.");
 }
 
 void SceneManager_Update(scenePacket *packet) {
@@ -37,7 +38,7 @@ void SceneManager_Update(scenePacket *packet) {
   if (ctx.isSwitchPending) {
     if (ctx.currentScene.Unload)
       ctx.currentScene.Unload(*packet->reg, *packet->bus);
-    EntitySystem_ClearAllHooks(*packet->reg);
+    //EntitySystem_ClearAllHooks(*packet->reg);
 
     if (ctx.factory) {
       ctx.currentScene = ctx.factory(ctx.nextState);
@@ -57,17 +58,17 @@ void SceneManager_Draw(scenePacket *packet) {
   }
 }
 
-void SceneManager_Shutdown(EntityRegistry &reg, CommandBus &bus) {
+void SceneManager_Shutdown(Registry &reg, CommandBus &bus) {
   if (ctx.currentScene.Unload) {
     ctx.currentScene.Unload(reg, bus);
   }
-  EntitySystem_ClearAllHooks(reg);
+ // EntitySystem_ClearAllHooks(reg);
 }
 
 void SceneManager_ChangeScene(int32_t nextState) {
   ctx.nextState = nextState;
   ctx.isSwitchPending = true;
-  Log(LogLevel::Info, "Scene changing queued for next frame...");
+  LogSystem::Info("Scene changing queued for next frame...");
 }
 
 int SceneManager_GetActiveState(void) { return ctx.activeState; }

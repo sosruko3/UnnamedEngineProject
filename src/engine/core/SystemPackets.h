@@ -1,19 +1,19 @@
 #pragma once
 
 #include <stdint.h>
-struct EntityRegistry;
+struct Registry;
 struct CommandBus;
 struct TimeContext;
 struct creVec2;
 struct CameraComponent;
 
 struct scenePacket {
-  EntityRegistry *reg;
+  Registry *reg;
   CommandBus *bus;
   float gameDt;
 };
 struct entityPacket {
-  EntityRegistry *reg;
+  Registry *reg;
   CommandBus *bus;
 };
 struct physicsPacket {

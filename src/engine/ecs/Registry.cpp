@@ -1,4 +1,5 @@
 #include "Registry.h"
+#include "engine/core/LogSystem.h"
 
 
 bool Registry::init(Arena* arena) {
@@ -22,11 +23,12 @@ Registry* Registry::createRegistry(Arena* arena) {
     if (arena == nullptr) return nullptr;
     // Allocate memory and initialize the Registry.
     auto* storage = arena->Push<Registry>();
+    if (storage == nullptr) return nullptr;
     auto* reg = ::new (storage) Registry{};
-    if (!reg) return nullptr;
     // Initialize the Registry buffer and variables.
     if (!reg->init(arena)) {
-        ::delete reg;
+        reg->~Registry();
+        LogSystem::Error("Failed to initialize Registry");
         return nullptr;
     }
     return reg;

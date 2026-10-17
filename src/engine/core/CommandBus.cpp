@@ -15,12 +15,10 @@ CommandBus* CommandBus::create(Arena* arena) {
   if (arena == nullptr) return nullptr;
   // Allocate memory and initialize the CommandBus.
   auto* storage = arena->Push<CommandBus>();
+  if (storage == nullptr) return nullptr;
   auto* bus = ::new (storage) CommandBus{};
-  if (!bus) return nullptr;
-  // Initialize the CommandBus buffer and variables.
   if (!bus->init(arena)) {
-    ::delete bus;
-    return nullptr;
+    bus->~CommandBus(); 
   }
   return bus;
 }

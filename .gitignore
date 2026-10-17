@@ -1,6 +1,5 @@
 game/
 game_config.h
-main.cpp
 test/
 
 # Prerequisites

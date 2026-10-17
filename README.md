@@ -8,6 +8,6 @@ Current release is 0.03. Planning to either quickly refactor old systems to c++ 
 
 
 # How to Build
-  git clone https://github.com/sosruko3/UnnamedEngineProject.git
-  cd UnnamedEngineProject
+  git clone https://github.com/sosruko3/UnnamedEngineProject.git &&
+  cd UnnamedEngineProject &&
   cmake -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build

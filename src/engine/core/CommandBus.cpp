@@ -19,6 +19,8 @@ CommandBus* CommandBus::create(Arena* arena) {
   auto* bus = ::new (storage) CommandBus{};
   if (!bus->init(arena)) {
     bus->~CommandBus(); 
+    LogSystem::Error("Failed to initialize CommandBus");
+    return nullptr;
   }
   return bus;
 }

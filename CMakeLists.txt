@@ -4,7 +4,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   Please run 'cmake -B build' and 'cmake --build build'.")
 endif()
 
-project(unNamedEngine VERSION 0.02 LANGUAGES CXX)
+project(unNamedEngine VERSION 0.03 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
